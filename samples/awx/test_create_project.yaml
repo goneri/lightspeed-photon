@@ -1,0 +1,26 @@
+---
+- name: create_awx_project
+  prompt: create a new awx project named foo on state present
+  accepted_answers:
+    - module: awx.awx.project
+    - module: project
+    - module: bar
+      module_called_with:
+        - name: foo
+    - module: something
+      additional_args:
+        loop: false
+        state: present
+
+- name: create_awx_inventory
+  prompt: create a new awx inventory
+  accepted_answers:
+    - module: awx.awx.inventory
+    - module: inventory
+
+- name: add_hosts_to_awx_inventory
+  context_from_file: context/add_host_to_awx_inventory.yaml
+  prompt: add hosts to awx inventory
+  accepted_answers:
+    - module: awx.awx.host
+    - module: host
