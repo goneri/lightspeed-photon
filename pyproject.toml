@@ -12,7 +12,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
 ]
-dynamic = ["version"]
+dynamic = ["dependencies", "version"]
 keywords = ["ansible", "test", "testing"]
 
 [project.urls]
@@ -33,6 +33,7 @@ lightspeed-photon = "ansible_lightspeed.photon.cli:main"
 packages = ["ansible_lightspeed.photon"]
 
 [tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 version = {attr = "ansible_lightspeed.photon.__version__"}
 
 [tool.black]
