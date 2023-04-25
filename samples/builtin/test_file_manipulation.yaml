@@ -1,0 +1,15 @@
+---
+- name: create_a_directory
+  prompt: create a /media/my_share directory
+  accepted_answers:
+    - &case1
+      module: ansible.builtin.file
+      module_called_with:
+        - path: /media/my_share
+        - state: directory
+      task_uses_loop: false
+      task_uses_become: false
+    - <<: *case1
+      module_called_with:
+        - path: /media/my_share/
+        - state: directory

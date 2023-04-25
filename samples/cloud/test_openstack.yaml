@@ -1,0 +1,11 @@
+---
+- name: create_openstack_instance
+  prompt: create a new OpenStack VM called test_vm
+  accepted_answers:
+    - module: openstack.cloud.server
+      module_called_with:
+        - name: test_vm
+      module_not_called_with:
+        - state: absent
+      task_uses_loop: false
+      task_uses_become: false

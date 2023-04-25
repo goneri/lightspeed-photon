@@ -1,9 +1,0 @@
----
-- name: create a new awx inventory
-  awx.awx.inventory:
-    name: "{{ name }}"
-    description: "{{ description }}"
-    organization: "{{ organization }}"
-    variables: "{{ variables }}"
-    state: present
-    register: create_inventory_result

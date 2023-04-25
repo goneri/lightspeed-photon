@@ -30,7 +30,7 @@ lightspeed-photon = "ansible_lightspeed.photon.cli:main"
 [tool]
 
 [tool.setuptools]
-packages = ["ansible_lightspeed.photon"]
+packages = ["ansible_lightspeed.photon", "ansible_lightspeed_service_client"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
@@ -66,3 +66,8 @@ select = [
     "YTT", # flake8-2020
 ]
 ignore = ["D100", "D104", "D203", "D213"]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+exclude = "(.*test_.*.py)"

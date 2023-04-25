@@ -1,1 +1,13 @@
 PyYAML
+
+# used by ansible_lightspeed_service_client
+attrs>=21.3.0
+httpx>=0.15.4,<0.24.0
+python-dateutil==2.8.0
+
+# GRPC client
+grpcio
+protobuf
+
+# utils/predictions_utils.py
+ansible-core
