@@ -6,6 +6,7 @@ from dataclasses import InitVar, dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
+import re
 
 import yaml
 
@@ -18,6 +19,7 @@ def load_args(args: list[str]) -> argparse.Namespace:
     """Parse the CLI argument."""
     parser = argparse.ArgumentParser(description="Run prediction tests")
     parser.add_argument("path", type=Path, help="Location of the prediction tests")
+    parser.add_argument("--test-case-filter", type=str, help="Only run the testcases matching this name (regexp)")
     parser.add_argument("--verbose", action="store_true", help="Increase the verbosity")
     parser.add_argument(
         "--debug", action="store_true", help="Give more information to troubleshoot a test"
@@ -234,6 +236,8 @@ def main() -> None:
 
     score_per_remote = {r.name: 0 for r in remotes}
     for test_case in test_cases:
+        if args.test_case_filter and not re.match(args.test_case_filter, test_case.name):
+            continue
         logger.info(f"🎬starting: {test_case.name}")
         scores = [(remote, test_case.evaluate(remote)) for remote in remotes]
 
