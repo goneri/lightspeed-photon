@@ -1,0 +1,14 @@
+---
+- name: install_vim_package
+  prompt: install the vim package
+  accepted_answers:
+    - module: ansible.builtin.package
+      module_called_with:
+        - name: vim
+      module_not_called_with:
+        - state: absent
+      task_uses_loop: false
+      task_uses_become: true
+    - module: ansible.builtin.dnf
+      module_called_with:
+        - name: [vim]
