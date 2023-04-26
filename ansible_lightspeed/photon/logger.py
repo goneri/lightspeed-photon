@@ -23,8 +23,3 @@ stream.setLevel(logging.DEBUG)
 logging.setLoggerClass(MyLogger)
 logger: MyLogger = logging.getLogger("photon")
 logger.addHandler(stream)
-
-
-# httpxlogger = logging.getLogger("httpx")
-# httpxlogger.setLevel(logging.DEBUG)
-# httpxlogger.addHandler(stream)
