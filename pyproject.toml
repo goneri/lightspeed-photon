@@ -65,9 +65,14 @@ select = [
     "W",  # Warning
     "YTT", # flake8-2020
 ]
-ignore = ["D100", "D104", "D203", "D213"]
+ignore = ["D100", "D101", "D102", "D104", "D107", "D203", "D213", "S101"]
+exclude = ["model_grpc_client/grpc_pb/common_service_pb2_grpc.py"]
 
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
 exclude = "(.*test_.*.py)"
+
+[tool.ruff.per-file-ignores]
+"ansible_lightspeed/photon/utils/test_predictions_utils.py" = ["D103"]
+"ansible_lightspeed/photon/utils/predictions_utils.py" = ["N818"]

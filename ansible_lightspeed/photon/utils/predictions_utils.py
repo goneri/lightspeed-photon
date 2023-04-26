@@ -2,7 +2,7 @@
 """utils to validate and mnipulate the predictions API response."""
 import logging
 import re
-from typing import Any
+from typing import Any, Literal, Union, cast
 
 import yaml
 from ansible.module_utils.parsing.convert_bool import BOOLEANS_FALSE, BOOLEANS_TRUE
@@ -10,24 +10,18 @@ from ansible.module_utils.parsing.convert_bool import BOOLEANS_FALSE, BOOLEANS_T
 from ansible_lightspeed.photon.logger import logger
 
 
-def is_jinja2(value):
-    """Validate if the input is valid jinja2
-    :param value:
-    :return: bool.
-    """
+def is_jinja2(value: Any) -> bool:
+    """Validate if the input is valid jinja2."""
     return isinstance(value, str) and bool(re.search(r"{{.*}}", value))
 
 
-def validate_int(value):
-    """Validate if the input is valid int
-    :param value:
-    :return: bool.
-    """
+def validate_int(value: Any) -> bool:
+    """Validate if the input is valid int."""
     if isinstance(value, int):
         return True
     try:
         int(value)
-        return True
+        return True  # noqa: TRY300
     except ValueError:
         pass
     if is_jinja2(value):
@@ -35,11 +29,8 @@ def validate_int(value):
     return False
 
 
-def validate_str(value):
-    """Validate if the input is valid string
-    :param value:
-    :return: bool.
-    """
+def validate_str(value: Any) -> bool:
+    """Validate if the input is valid string."""
     if isinstance(value, str):
         return True
     if validate_int(value):
@@ -47,11 +38,8 @@ def validate_str(value):
     return False
 
 
-def validate_bool(value):
-    """Validate if the input is bool
-    :param value:
-    :return: bool.
-    """
+def validate_bool(value: Any) -> bool:
+    """Validate if the input is bool."""
     if value in BOOLEANS_FALSE:
         return True
     if value in BOOLEANS_TRUE:
@@ -63,11 +51,8 @@ def validate_bool(value):
     return False
 
 
-def validate_condition(value):
-    """Validate if the input is a condition
-    :param value:
-    :return: bool.
-    """
+def validate_condition(value: Any) -> bool:
+    """Validate if the input is a condition."""
     if isinstance(value, (str, list)):
         return True
     if validate_bool(value):
@@ -75,11 +60,8 @@ def validate_condition(value):
     return False
 
 
-def validate_str_or_list_of_str(value):
-    """Validate if the input is valid string or list of strings
-    :param value:
-    :return: bool.
-    """
+def validate_str_or_list_of_str(value: Any) -> bool:
+    """Validate if the input is valid string or list of strings."""
     if isinstance(value, str):
         return True
     if isinstance(value, list):
@@ -87,21 +69,15 @@ def validate_str_or_list_of_str(value):
     return False
 
 
-def validate_str_or_dict(value):
-    """Validate if the input is dict or string
-    :param value:
-    :return: bool.
-    """
+def validate_str_or_dict(value: Any) -> bool:
+    """Validate if the input is dict or string."""
     if isinstance(value, (str, dict)):
         return True
     return False
 
 
-def validate_dict(value):
-    """Validate if the input is valid dict
-    :param value:
-    :return: bool.
-    """
+def validate_dict(value: Any) -> bool:
+    """Validate if the input is valid dict."""
     if isinstance(value, dict):
         return True
     if is_jinja2(value):
@@ -109,11 +85,8 @@ def validate_dict(value):
     return False
 
 
-def validate_list(value):
-    """Validate if the input is valid list
-    :param value:
-    :return: bool.
-    """
+def validate_list(value: Any) -> bool:
+    """Validate if the input is valid list."""
     if isinstance(value, list):
         return True
     if is_jinja2(value):
@@ -121,11 +94,8 @@ def validate_list(value):
     return False
 
 
-def invalid():
-    """Input is invalid
-    :param value:
-    :return: Flase.
-    """
+def invalid() -> Literal[False]:
+    """Input is invalid."""
     return False
 
 
@@ -206,7 +176,7 @@ class Task:
     }
 
     @classmethod
-    def validate_input(cls, struct):
+    def validate_input(cls: Any, struct: dict[str, Any]) -> bool:
         """Validate the sanity of the input structure."""
         for name, value in struct.items():
             if name in Task.known_fields and not cls.known_fields[name](value):
@@ -215,7 +185,7 @@ class Task:
         try:
             keys = set(struct.keys())
         except AttributeError:
-            logging.error("Cannot load keys :%s", struct)
+            logging.error("Cannot load keys :%s", struct)  # noqa: TRY400
             return False
 
         candidates = list(keys - set(Task.known_fields.keys()))
@@ -242,15 +212,15 @@ class Task:
         self.module = self.resolve_module_name()
         self.args = self.get_args()
 
-    def get_args(self):
-        """Returns the module argument args used to call the task."""
+    def get_args(self) -> dict[str, Any]:
+        """Return the module argument args used to call the task."""
         if self.module in ["ansible.builtin.set_fact", "set_fact"]:
             key_value = self.struct[self.module]
             return self.struct.get("args", {"key_value": key_value})
         if isinstance(self.struct.get("args"), dict):
-            return self.struct.get("args")
+            return cast(dict[str, Any], self.struct.get("args"))
         if self.module and isinstance(self.struct[self.module], dict):
-            return self.struct[self.module]
+            return cast(dict[str, Any], self.struct[self.module])
         return {}
 
     def resolve_module_name(self) -> str:
@@ -261,13 +231,7 @@ class Task:
             return candidates[0]
         return ""
 
-    def assert_module_in(self, candidates: list[str]) -> None:
-        """Assert the package name match the expectation."""
-        # support the case where a list is being passed to the function
-        if self.module not in candidates:
-            raise WrongModule(f"Expected: {candidates}, got: {self.module}")
-
-    def module_called_with(self, *args: str | list[str], **kwargs: dict[str, Any]) -> bool:
+    def module_called_with(self, *args: Union[str, list[str]], **kwargs: dict[str, Any]) -> bool:
         """Assert the package name match the expectation."""
         for k in args:
             if isinstance(k, list):
@@ -299,20 +263,6 @@ class Task:
                 return False
         return True
 
-    def assert_state(self, expected_state: str | set, default: str = "present") -> None:
-        """Assert the state field is valid."""
-        # support the case where a list is being passed to the function
-        state = self.args.get("state", default)
-        if isinstance(expected_state, set):
-            if state not in expected_state:
-                raise IncorrectStateValue(
-                    f"state: {state}, doesn't patch the expected: {expected_state}"
-                )
-        elif state != expected_state:
-            raise IncorrectStateValue(
-                f"state: {state}, doesn't patch the expected: {expected_state}"
-            )
-
     def module_not_called_with(self, *args: str, **kwargs: dict[str, Any]) -> bool:
         """Assert the module was not called with unwanted parameters."""
         for k in args:
@@ -325,7 +275,7 @@ class Task:
                 return False
         return True
 
-    def yaml_print(self):
+    def yaml_print(self) -> None:
         """Print yaml file."""
         print(yaml.dump(self.struct))
 
@@ -360,11 +310,6 @@ class Task:
         """Validate privilaege escalation is used."""
         return "become" in self.struct
 
-    def assert_has_no_loop(self):
-        """Raise an error if the task uses a looping system."""
-        if self.use_loop():
-            raise ShouldNotUseALoop("The task should not use a loop")
-
     def oldstyle_inline_args(self) -> bool:
         """Raise an error if old style is used."""
         if self.module in [
@@ -384,7 +329,7 @@ class Task:
         values = []
         find_var_re = r"{{\s*(.*?)\s*}}"
 
-        def add_any(value: Any):
+        def add_any(value: Any) -> None:
             if isinstance(value, list):
                 for i in value:
                     add_any(i)

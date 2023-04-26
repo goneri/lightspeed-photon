@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
+import re
 import sys
 from dataclasses import InitVar, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
-import re
+from typing import Any, Optional, Union
 
 import yaml
 
@@ -19,7 +19,9 @@ def load_args(args: list[str]) -> argparse.Namespace:
     """Parse the CLI argument."""
     parser = argparse.ArgumentParser(description="Run prediction tests")
     parser.add_argument("path", type=Path, help="Location of the prediction tests")
-    parser.add_argument("--test-case-filter", type=str, help="Only run the testcases matching this name (regexp)")
+    parser.add_argument(
+        "--test-case-filter", type=str, help="Only run the testcases matching this name (regexp)"
+    )
     parser.add_argument("--verbose", action="store_true", help="Increase the verbosity")
     parser.add_argument(
         "--debug", action="store_true", help="Give more information to troubleshoot a test"
@@ -46,11 +48,12 @@ class EvaluationResult:
     task_parameters_are_correct: ResultStatus = ResultStatus.NOT_EVALUATED
 
 
-CheckListT = list[str | dict[str, Any]]
+CheckListT = list[Union[str, dict[str, Any]]]
 
 
-def check_list_to_kwargs(check_list) -> [list[str], dict[str, Any]]:
-    v = []
+def check_list_to_kwargs(check_list: CheckListT) -> tuple[list[str], dict[str, Any]]:
+    """Convert a list as found with module_called_with to *args, **kwargs output."""
+    v: list[str] = []
     kv = {}
     for i in check_list:
         if isinstance(i, dict):
@@ -117,27 +120,27 @@ class TestCase:
     name: str
     prompt: str
     test_file: Path
-    context_file: str = ""
+    context_file: Optional[Path] = None
     context: str = ""
     accepted_answers: list[AnswerCheck] = field(default_factory=list)
     task: Optional[Task] = None
-    context_from_file: InitVar[Path | None] = None
+    context_from_file: InitVar[Union[Path, None]] = None
 
     def __post_init__(self, context_from_file: Optional[Path] = None) -> None:
         """Load the context from a file."""
         if not context_from_file:
             return
-        self.context_file = self.test_file.parent / context_from_file
+        self.context_file: Path = self.test_file.parent / context_from_file
         self.context = self.context_file.read_text()
 
-    def context_origin(self):
+    def context_origin(self) -> str:
         if self.context_file:
             return f"from {self.context_file}"
         if self.context:
             return "from inline string"
         return "none"
 
-    def evaluate(self, remote) -> int:
+    def evaluate(self, remote: Remote) -> int:
         """Query the API with context/prompt and evaluate all the checks."""
         logger.debug(f"\nTesting with {remote.name}")
         logger.debug(f"📹context: {self.context_origin()}")
@@ -151,23 +154,16 @@ class TestCase:
             logger.verbose("🔥Invalid answer from the server.")
             return 0
         logger.verbose("🧙Answer:\n" + yaml.dump(task.struct))
-        best_result = None  # type: EvaluationResult
+        best_score: int = 0
         for index, check in enumerate(self.accepted_answers, 1):
             if len(self.accepted_answers):
                 logger.verbose(f"Checking {index} accepted_answer...")
             result = check.evaluate(task)
             if len(self.accepted_answers):
                 logger.verbose(f"... score {result.score}")
-            if best_result is None:
-                best_result = result
-                continue
-            if result.score > best_result.score:
-                best_result = result
-            if best_result.score == 100:
-                break
-        if best_result is None or best_result.score == 0:
-            return 0
-        return best_result.score
+            if result.score > best_score:
+                best_score = result.score
+        return best_score
 
 
 def load_test_file(test_file: Path) -> list[TestCase]:
@@ -219,7 +215,7 @@ def main() -> None:
             name="service-ari-v9",
             remote_type="service",
             end_point="http://localhost:8000",
-            token=os.environ.get("WISDOM_TOKEN"),
+            token=os.environ.get("WISDOM_TOKEN", ""),
         ),
         Remote(
             name="model-v9",

@@ -3,27 +3,16 @@
 import json
 import urllib.request
 from dataclasses import dataclass
-from typing import Any, Literal, Optional
+from typing import Literal
 
 import yaml
 
 from ansible_lightspeed.photon.logger import logger
 from ansible_lightspeed.photon.utils.predictions_utils import Task
-from model_grpc_client.grpc_client import GrpcClient
+from model_grpc_client.grpc_client import GrpcClient, GrpcPayload
 
 
-def unwrap_prediction(prompt: str, data: dict[str, Any]) -> dict[str, Any]:
-    """Unwrap a given response to dict."""
-    first_prediction = prompt + "\n" + data["predictions"][0]
-    try:
-        tasks = yaml.safe_load(first_prediction)
-    except yaml.YAMLError:
-        logger.debug(f"CANNOT LOAD YAML:\n{first_prediction}")
-        raise PredictionFailure from None
-    return tasks[0]
-
-
-class PredictionFailure(Exception):
+class PredictionFailure(Exception):  # noqa: N818
     """Failed to get a prediction."""
 
 
@@ -32,8 +21,8 @@ class Remote:
     remote_type: Literal["service", "model_grpc"]
     name: str
     end_point: str
-    token: Optional[str | None] = None
-    grpc_model_name: Optional[str | None] = None
+    token: str = ""
+    grpc_model_name: str = ""
 
     def get_prediction(self, prompt: str, context: str) -> Task:
         if not prompt.lstrip().startswith("- name: "):
@@ -43,17 +32,19 @@ class Remote:
             if context:
                 prompt = context + prompt
 
-            data = json.dumps({"prompt": prompt})
+            payload = json.dumps({"prompt": prompt}).encode()
             req = urllib.request.Request(
                 url=f"{self.end_point}/api/v0/ai/completions/",
-                data=data.encode(),
+                data=payload,
                 method="POST",
                 headers={
                     "content-type": "application/json",
                     "Authorization": f"Bearer {self.token}",
                 },
             )
-            with urllib.request.urlopen(req) as f:
+            # S310 Audit URL open for permitted schemes. Allowing use of `file:`
+            # or custom schemes is often unexpected.
+            with urllib.request.urlopen(req) as f:  # noqa: S310
                 if f.status != 200:
                     logger.verbose(f"HTTP status: {f.status}")
                 content = f.read().decode("utf-8")
@@ -65,15 +56,10 @@ class Remote:
             task = Task(yaml.safe_load(parsed["predictions"][0]))
         else:
             client = GrpcClient(inference_url=self.end_point)
-            payload = {
-                "instances": [
-                    {
-                        "context": context,
-                        "prompt": prompt,
-                    }
-                ]
-            }
-            data = client.infer(payload, self.grpc_model_name)
-            unwrapped = unwrap_prediction(prompt, data)
-            task = Task(unwrapped)
+            grpc_payload = GrpcPayload(context, prompt)
+            try:
+                data = client.infer(grpc_payload, self.grpc_model_name)
+            except yaml.YAMLError:
+                raise PredictionFailure from None
+            task = Task(data)
         return task
