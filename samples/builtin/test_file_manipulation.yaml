@@ -7,6 +7,8 @@
       module_called_with:
         - path: /media/my_share
         - state: directory
+      module_not_called_with:
+        - mode: '0777'
       task_uses_loop: false
       task_uses_become: false
     - <<: *case1
