@@ -18,8 +18,8 @@ def unwrap_prediction(prompt: str, data: dict[str, Any]) -> dict[str, Any]:
     try:
         tasks = yaml.safe_load(first_prediction)
     except yaml.YAMLError:
-        logger.error("CANNOT LOAD YAML: %s", first_prediction)
-        raise
+        logger.debug(f"CANNOT LOAD YAML:\n{first_prediction}")
+        raise PredictionFailure from None
     return tasks[0]
 
 
