@@ -11,7 +11,7 @@
       task_uses_become: false
 
 - name: create_an_aws_instance_with_context
-  prompt: create a new AWS instance called test_vm
+  prompt: "    - name: create a new AWS instance called test_vm"
   context_from_file: context/aws_long_context.yaml
   accepted_answers:
     - module: amazon.aws.ec2_instance

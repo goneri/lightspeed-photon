@@ -3,7 +3,6 @@
 # pylint: disable=missing-module-docstring
 import pytest
 import yaml
-
 from utils.predictions_utils import Task
 
 sample_file = """

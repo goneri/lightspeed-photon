@@ -21,7 +21,10 @@ streamformat = logging.Formatter("%(message)s")
 stream.setFormatter(streamformat)
 stream.setLevel(logging.DEBUG)
 logging.setLoggerClass(MyLogger)
-logger: MyLogger = logging.getLogger('photon')
+logger: MyLogger = logging.getLogger("photon")
 logger.addHandler(stream)
 
-logging.getLogger("httpx").setLevel(logging.WARNING)
+
+# httpxlogger = logging.getLogger("httpx")
+# httpxlogger.setLevel(logging.DEBUG)
+# httpxlogger.addHandler(stream)

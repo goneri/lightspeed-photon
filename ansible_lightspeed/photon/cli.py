@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 
-from enum import Enum
 import argparse
 import sys
-from pprint import pformat
-from dataclasses import dataclass, field, InitVar
+from dataclasses import InitVar, dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
-from ansible_lightspeed.photon.utils.predictions_utils import Task
 
 import yaml
 
-
 from ansible_lightspeed.photon.logger import logger
-
-from ansible_lightspeed.photon.client import AuthenticatedClient, get_prediction
+from ansible_lightspeed.photon.remote import PredictionFailure, Remote
+from ansible_lightspeed.photon.utils.predictions_utils import Task
 
 
 def load_args(args: list[str]) -> argparse.Namespace:
@@ -25,6 +22,7 @@ def load_args(args: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--debug", action="store_true", help="Give more information to troubleshoot a test"
     )
+    parser.add_argument("--remote", type=str, help="Run the checks with the following remote only")
     return parser.parse_args(args=args)
 
 
@@ -49,7 +47,7 @@ class EvaluationResult:
 CheckListT = list[str | dict[str, Any]]
 
 
-def check_list_to_kwargs(check_list):
+def check_list_to_kwargs(check_list) -> [list[str], dict[str, Any]]:
     v = []
     kv = {}
     for i in check_list:
@@ -59,7 +57,7 @@ def check_list_to_kwargs(check_list):
             v += i
         else:
             raise TypeError()
-    return v, kv
+    return list(v), kv
 
 
 @dataclass
@@ -81,31 +79,29 @@ class AnswerCheck:
             result.module_name_is_correct = ResultStatus.FAILURE
             logger.debug(f"Module doesn't match : {self.module} != {task.module}")
             return result
-        result.score += 10
+        result.score += 20
 
         if self.module_called_with:
             v, kv = check_list_to_kwargs(self.module_called_with)
             if task.module_called_with(*v, **kv):
-                return result
-        result.score += 10
+                result.score += 10
 
         if self.module_not_called_with:
             v, kv = check_list_to_kwargs(self.module_not_called_with)
             if task.module_not_called_with(*v, **kv):
-                return result
-        result.score += 10
+                result.score += 10
 
         if self.task_uses_loop is not None:
-            if self.task_uses_loop != task.use_loop():
-                logger.info("Unexpect setting for the loop key")
-                return result
-        result.score += 10
+            if self.task_uses_loop == task.use_loop():
+                result.score += 10
+            else:
+                logger.debug("Unexpected setting for the loop key")
 
         if self.task_uses_become is not None:
-            if task.use_privilege_escalation() != self.task_uses_become:
-                logger.info("Unexpect setting for the become key")
-                return result
-        result.score += 10
+            if task.use_privilege_escalation() == self.task_uses_become:
+                result.score += 5
+            else:
+                logger.debug("Unexpected setting for the become key")
 
         result.module_name_is_correct = ResultStatus.SUCCESS
 
@@ -139,17 +135,19 @@ class TestCase:
             return "from inline string"
         return "none"
 
-    def evaluate(self) -> None:
+    def evaluate(self, remote) -> int:
         """Query the API with context/prompt and evaluate all the checks."""
-        logger.info(f"🎬starting: {self.name}")
+        logger.debug(f"\nTesting with {remote.name}")
         logger.debug(f"📹context: {self.context_origin()}")
         logger.debug(f"📝test path {self.test_file}")
         logger.verbose(f"🔮Sending prompt: {self.prompt}")
         # TODO read configuration from CLI arguments
-        import os
 
-        api_client = AuthenticatedClient("http://localhost:8000", os.environ.get("WISDOM_TOKEN"))
-        task = get_prediction(api_client, self.prompt, self.context)
+        try:
+            task = remote.get_prediction(self.prompt, self.context)
+        except PredictionFailure:
+            logger.verbose("🔥Invalid answer from the server.")
+            return 0
         logger.verbose("🧙Answer:\n" + yaml.dump(task.struct))
         best_result = None  # type: EvaluationResult
         for index, check in enumerate(self.accepted_answers, 1):
@@ -165,10 +163,9 @@ class TestCase:
                 best_result = result
             if best_result.score == 100:
                 break
-        if best_result.score == 0:
-            logger.info("⭕ No test passing")
-        else:
-            logger.info(f"✅ Final score: {best_result.score}")
+        if best_result is None or best_result.score == 0:
+            return 0
+        return best_result.score
 
 
 def load_test_file(test_file: Path) -> list[TestCase]:
@@ -213,6 +210,41 @@ def main() -> None:
     else:
         logger.setLevel("INFO")
 
+    import os
+
+    remotes = [
+        Remote(
+            name="service-ari-v9",
+            remote_type="service",
+            end_point="http://localhost:8000",
+            token=os.environ.get("WISDOM_TOKEN"),
+        ),
+        Remote(
+            name="model-v9",
+            remote_type="model_grpc",
+            end_point="localhost:8033",
+            grpc_model_name="ansible-wisdom-v09",
+        ),
+    ]
+
+    if args.remote:
+        remotes = [r for r in remotes if args.remote == r.name]
+
     test_cases = test_loader(args.path)
+
+    score_per_remote = {r.name: 0 for r in remotes}
     for test_case in test_cases:
-        test_case.evaluate()
+        logger.info(f"🎬starting: {test_case.name}")
+        scores = [(remote, test_case.evaluate(remote)) for remote in remotes]
+
+        logger.info("test score(s)")
+        for remote, score in scores:
+            if score == 0:
+                logger.info(f"⭕ [{remote.name}]: 0")
+            else:
+                logger.info(f"✅ [{remote.name}]: {score}")
+                score_per_remote[remote.name] += score
+
+    logger.info("\n🏁Final score(s)")
+    for remote_name, score in score_per_remote.items():
+        logger.info(f"  - {remote_name}: {score}")
