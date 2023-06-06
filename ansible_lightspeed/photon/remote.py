@@ -4,6 +4,7 @@ import json
 import urllib.request
 from dataclasses import dataclass
 from typing import Literal
+from time import sleep
 
 import yaml
 
@@ -42,12 +43,24 @@ class Remote:
                     "Authorization": f"Bearer {self.token}",
                 },
             )
+
+            content = ""
             # S310 Audit URL open for permitted schemes. Allowing use of `file:`
             # or custom schemes is often unexpected.
-            with urllib.request.urlopen(req) as f:  # noqa: S310
-                if f.status != 200:
-                    logger.verbose(f"HTTP status: {f.status}")
-                content = f.read().decode("utf-8")
+            for retry in range(10, 1, -1):
+                try:
+                    with urllib.request.urlopen(req) as f:  # noqa: S310
+                        if f.status != 200:
+                            logger.verbose(f"HTTP status: {f.status}")
+                        content = f.read().decode("utf-8")
+                        break
+                except urllib.error.HTTPError as e:
+                    if e.code == 429:
+                        sleep(retry)
+                        continue
+                    raise
+            if not content:
+                raise PredictionFailure("Cannot get an answer from the server. Too many retry.")
             try:
                 parsed = json.loads(content)
             except json.decoder.JSONDecodeError:
