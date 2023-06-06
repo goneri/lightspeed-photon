@@ -9,6 +9,8 @@ from ansible.module_utils.parsing.convert_bool import BOOLEANS_FALSE, BOOLEANS_T
 
 from ansible_lightspeed.photon.logger import logger
 
+from ansible.module_utils.parsing.convert_bool import BOOLEANS, boolean
+
 
 def is_jinja2(value: Any) -> bool:
     """Validate if the input is valid jinja2."""
@@ -231,22 +233,20 @@ class Task:
             return candidates[0]
         return ""
 
-    def module_called_with(self, *args: Union[str, list[str]], **kwargs: dict[str, Any]) -> bool:
+    def module_called_with(self, *args: Union[str, list[str]], **kwargs: dict[str, Any]) -> int:
         """Assert the package name match the expectation."""
+        score = 0
         for k in args:
-            if isinstance(k, list):
-                if not any(arg in self.args for arg in k):
-                    logger.debug("Missing one of the parameters: %s", k)
-                    return False
-            else:
-                if k not in self.args:
-                    logger.debug("Missing parameter: %s", k)
-                    return False
+            if k not in self.args:
+                logger.debug(f"Missing parameter: {k}")
+                continue
+            score += 10
 
         for k, v in kwargs.items():
             if k not in self.args:
-                logger.debug("Missing parameter: %s", k)
-                return False
+                logger.debug(f"Missing parameter: {k}")
+                continue
+            score += 10
 
             if isinstance(v, (str, int, bool)):
                 if self.args[k] != v:
@@ -254,26 +254,90 @@ class Task:
                         f"Incorrect parameter value for key {k}: got {self.args[k]}, "
                         f"expected: {v}"
                     )
-                    return False
-            elif isinstance(v, set):
+                continue
+            if isinstance(v, set):
                 if self.args[k] not in v:
                     logger.debug(f"Incorrect parameter value for key {k}: got {self.args[k]}, ")
 
                 logger.debug("Invalid type: %s, expect set, int, bool or str", type(v))
-                return False
-        return True
+                continue
 
-    def module_not_called_with(self, *args: str, **kwargs: dict[str, Any]) -> bool:
+            if v in BOOLEANS and boolean(v) == boolean(self.args[k]):
+                score += 15
+            elif v == self.args[k]:
+                score += 15
+        return score
+
+    def module_not_called_with(self, *args: str, **kwargs: dict[str, Any]) -> int:
         """Assert the module was not called with unwanted parameters."""
+        score = 0
         for k in args:
             if k in self.args:
                 logger.debug(f"Unexpected key: {k}")
-                return False
+                continue
+            score -= 10
         for k, v in kwargs.items():
-            if k in self.args and self.args[k] == v:
-                logger.debug(f"Unexpected key/value: {k}, {v}")
-                return False
-        return True
+            if k not in self.args:
+                continue
+
+            if v in BOOLEANS and boolean(v) == boolean(self.args[k]):
+                score -= 15
+            elif v == kwargs[k]:
+                score -= 15
+        return score
+
+    def task_called_with(self, *args: Union[str, list[str]], **kwargs: dict[str, Any]) -> int:
+        score = 0
+        for k in args:
+            if k not in self.struct:
+                logger.debug(f"Missing task parameter: {k}")
+                continue
+            score += 10
+
+        for k, v in kwargs.items():
+            if k not in self.struct:
+                logger.debug(f"Missing task parameter: {k}")
+                continue
+            score += 10
+
+            if isinstance(v, (str, int, bool)):
+                if self.struct[k] != v:
+                    logger.debug(
+                        f"Incorrect task parameter value for key {k}: got {self.struct[k]}, "
+                        f"expected: {v}"
+                    )
+                continue
+            if isinstance(v, set):
+                if self.struct[k] not in v:
+                    logger.debug(
+                        f"Incorrect task parameter value for key {k}: got {self.struct[k]}, "
+                    )
+
+                logger.debug("Invalid type: %s, expect set, int, bool or str", type(v))
+                continue
+
+            if v in BOOLEANS and boolean(v) == boolean(self.struct[k]):
+                score += 15
+            elif v == self.struct[k]:
+                score += 15
+        return score
+
+    def task_not_called_with(self, *args: str, **kwargs: dict[str, Any]) -> int:
+        score = 0
+        for k in args:
+            if k in self.struct:
+                logger.debug(f"Unexpected task parameter: {k}")
+                continue
+            score -= 10
+        for k, v in kwargs.items():
+            if k not in self.struct:
+                continue
+
+            if v in BOOLEANS and boolean(v) == boolean(self.struct[k]):
+                score -= 15
+            elif v == kwargs[k]:
+                score -= 15
+        return score
 
     def yaml_print(self) -> None:
         """Print yaml file."""

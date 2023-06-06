@@ -76,24 +76,42 @@ class AnswerCheck:
     task_uses_loop: Optional[bool] = None
     task_uses_become: Optional[bool] = None
 
+    def __post_init__(self) -> None:
+        not_called_with_default = ["delegate_to", "ignore_errors"]
+
+        def _need_default(key: str) -> bool:
+            for i in not_called_with_default:
+                for j in self.task_called_with:
+                    if isinstance(j, dict) and i in j:
+                        return False
+                    elif i == j:
+                        return False
+            return True
+
+        for i in not_called_with_default:
+            if _need_default(i):
+                self.task_not_called_with.append(i)
+
     def evaluate(self, task: Task) -> EvaluationResult:
         """Evaluate the check against the answer."""
         result = EvaluationResult(task)
         if self.module != task.module:
             result.module_name_is_correct = ResultStatus.FAILURE
-            logger.debug(f"Module doesn't match : {self.module} != {task.module}")
+            logger.debug(f"Module name is not {self.module}")
             return result
-        result.score += 20
+        result.score += 40
 
-        if self.module_called_with:
-            v, kv = check_list_to_kwargs(self.module_called_with)
-            if task.module_called_with(*v, **kv):
-                result.score += 10
+        v, kv = check_list_to_kwargs(self.module_called_with)
+        result.score += task.module_called_with(*v, **kv)
 
-        if self.module_not_called_with:
-            v, kv = check_list_to_kwargs(self.module_not_called_with)
-            if task.module_not_called_with(*v, **kv):
-                result.score += 10
+        v, kv = check_list_to_kwargs(self.module_not_called_with)
+        result.score += task.module_not_called_with(*v, **kv)
+
+        v, kv = check_list_to_kwargs(self.task_called_with)
+        result.score += task.task_called_with(*v, **kv)
+
+        v, kv = check_list_to_kwargs(self.task_not_called_with)
+        result.score += task.task_not_called_with(*v, **kv)
 
         if self.task_uses_loop is not None:
             if self.task_uses_loop == task.use_loop():
