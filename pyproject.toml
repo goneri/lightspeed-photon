@@ -30,7 +30,7 @@ lightspeed-photon = "ansible_lightspeed.photon.cli:main"
 [tool]
 
 [tool.setuptools]
-packages = ["ansible_lightspeed.photon", "ansible_lightspeed_service_client"]
+packages = ["ansible_lightspeed.photon", "model_grpc_client"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
