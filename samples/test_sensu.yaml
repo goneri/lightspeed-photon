@@ -1,0 +1,42 @@
+- name: test_sensu_role_binding_info_1
+  prompt: Retrieve foo role binding
+  context: "\n- name: List all Sensu role bindings\n  sensu.sensu_go.role_binding_info:\n\
+    \  register: result\n"
+  accepted_answers:
+  - module: sensu.sensu_go.role_binding_info
+    module_called_with:
+    - name: foo
+    task_uses_loop: false
+  - module: role_binding_info
+    module_called_with:
+    - name: foo
+    task_uses_loop: false
+- name: test_sensu_event_1
+  prompt: Create an event named bar
+  context: "\n- name: create sensu cluster named foo\n  sensu.sensu_go.cluster:\n\
+    \    name: foo\n    api_url: http://127.0.0.34:8080\n  register: result\n"
+  accepted_answers:
+  - module: sensu.sensu_go.event
+    module_called_with:
+    - name: bar
+    task_uses_loop: false
+  - module: event
+    module_called_with:
+    - name: bar
+    task_uses_loop: false
+- name: test_sensu_event_info_1
+  prompt: List sensu events
+  context: "\n- name: create sensu cluster named foo\n  sensu.sensu_go.cluster:\n\
+    \    name: foo\n    api_url: http://127.0.0.34:8080\n  register: result\n- name:\
+    \ Create an event named bar\n  sensu.sensu_go.event:\n    name: bar\n    url:\
+    \ http://foo.com\n  register: result\n- name: List Sensu events\n  sensu.sensu_go.event_info:\n\
+    \    name: bar\n  register: result\n"
+  accepted_answers:
+  - module: sensu.sensu_go.event_info
+    module_called_with:
+    - name: bar
+    task_uses_loop: false
+  - module: event_info
+    module_called_with:
+    - name: bar
+    task_uses_loop: false

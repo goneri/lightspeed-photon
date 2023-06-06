@@ -1,0 +1,134 @@
+- name: test_cisco_nxos_aaa_server_1
+  prompt: Setup nxos radius server basic settings
+  context: '
+
+    - name: cisco cloud set up using nxos
+
+
+    '
+  accepted_answers:
+  - module: cisco.nxos.nxos_aaa_server
+    module_called_with:
+    - server_type: radius
+    - state: default
+    task_uses_loop: false
+  - module: nxos_aaa_server
+    module_called_with:
+    - server_type: radius
+    - state: default
+    task_uses_loop: false
+- name: test_cisco_nxos_aaa_server_2
+  prompt: Setup nxos tacacs server basic settings
+  context: '
+
+    - name: cisco cloud set up using nxos
+
+
+    '
+  accepted_answers:
+  - module: cisco.nxos.nxos_aaa_server
+    module_called_with:
+    - server_type: tacacs
+    - state: default
+    task_uses_loop: false
+  - module: nxos_aaa_server
+    module_called_with:
+    - server_type: tacacs
+    - state: default
+    task_uses_loop: false
+- name: test_cisco_nxos_aaa_server_host_1
+  prompt: Setup radius server host settings
+  context: '
+
+    - name: cisco cloud set up using nxos
+
+
+    '
+  accepted_answers:
+  - module: cisco.nxos.nxos_aaa_server_host
+    module_called_with:
+    - server_type: radius
+    - state: present
+    task_uses_loop: false
+  - module: nxos_aaa_server_host
+    module_called_with:
+    - server_type: radius
+    - state: present
+    task_uses_loop: false
+- name: test_cisco_nxos_aaa_server_host_2
+  prompt: Setup tacacs server host settings
+  context: '
+
+    - name: cisco cloud set up using nxos
+
+
+    '
+  accepted_answers:
+  - module: cisco.nxos.nxos_aaa_server_host
+    module_called_with:
+    - server_type: tacacs
+    - state: present
+    task_uses_loop: false
+  - module: nxos_aaa_server_host
+    module_called_with:
+    - server_type: tacacs
+    - state: present
+    task_uses_loop: false
+- name: test_cisco_nxos_config_1
+  prompt: Configure hostname
+  context: '
+
+    - name: cisco cloud set up using nxos
+
+
+    '
+  accepted_answers:
+  - module: cisco.nxos.nxos_config
+    module_called_with:
+    - state: present
+    task_uses_loop: false
+  - module: nxos_config
+    module_called_with:
+    - state: present
+    task_uses_loop: false
+- name: test_cisco_nxos_command_1
+  prompt: run show version command
+  context: "\n- name: cisco cloud set up using nxos\n  tasks:\n  - name: Setup radius\
+    \ server basic settings\n    cisco.nxos.nxos_aaa_server:\n      server_type: radius\n\
+    \      deadtime: default\n      server_timeout: default\n      directed_request:\
+    \ default\n      state: default\n    register: result\n\n"
+  accepted_answers:
+  - module: cisco.nxos.nxos_command
+    task_uses_loop: false
+  - module: nxos_command
+    task_uses_loop: false
+- name: test_cisco_nxos_ntp_1
+  prompt: set NTP server
+  context: '
+
+    - name: cisco cloud set up using nxos
+
+
+    '
+  accepted_answers:
+  - module: cisco.nxos.nxos_ntp
+    task_uses_loop: false
+  - module: nxos_ntp
+    task_uses_loop: false
+- name: test_cisco_nxos_snmp_host_1
+  prompt: ensure SNMP host is configured
+  context: '
+
+    - name: cisco cloud set up using nxos
+
+
+    '
+  accepted_answers:
+  - module: cisco.nxos.nxos_snmp_host
+    module_called_with:
+    - state: configured
+    task_uses_loop: false
+  - module: nxos_snmp_host
+    module_called_with:
+    - state: configured
+    task_uses_loop: false

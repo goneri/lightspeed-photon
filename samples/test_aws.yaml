@@ -1,0 +1,61 @@
+- name: test_create_a_s3_bucket_called_foo_1
+  prompt: create an AWS S3 bucket called foo
+  accepted_answers:
+  - module: amazon.aws.s3_bucket
+    module_called_with:
+    - name: foo
+    - state: present
+  - module: s3_bucket
+    module_called_with:
+    - name: foo
+    - state: present
+- name: test_create_a_s3_bucket_called_foo_without_any_policy_1
+  prompt: create an AWS S3 bucket called foo without any policy
+  accepted_answers:
+  - module: amazon.aws.s3_bucket
+    module_called_with:
+    - name: foo
+    - state: present
+    module_not_called_with:
+    - policy
+  - module: s3_bucket
+    module_called_with:
+    - name: foo
+    - state: present
+    module_not_called_with:
+    - policy
+- name: test_create_a_new_ec2_instance_1
+  prompt: create an EC2 instance called my-instance
+  accepted_answers:
+  - module: amazon.aws.ec2_instance
+    module_called_with:
+    - name: my-instance
+  - module: ec2_instance
+    module_called_with:
+    - name: my-instance
+- name: test_create_an_instance_with_long_context_1
+  prompt: '    - name: create an EC2 instance called my-instance'
+  context: "\n---\n- name: AWS Cloud Operations\n  hosts: localhost\n  connection:\
+    \ local\n\n  vars:\n    cidr_block: \"10.0.0.0/16\"\n  tasks:\n    - name: Create\
+    \ a vpc called myvpc\n      amazon.aws.ec2_vpc_net:\n        name: \"myvpc\"\n\
+    \        region: \"us-east-1\"\n        cidr_block: \"{{ cidr_block }}\"\n   \
+    \     dns_support: true\n        tags:\n          Description: Created by ansible\n\
+    \          Name: \"myvpc\"\n      register: myvpc\n\n    - name: Create a keypair\
+    \ called mykeypair\n      amazon.aws.ec2_key:\n        name: \"mykeypair\"\n \
+    \       region: \"us-east-1\"\n      register: mykeypair\n\n    - name: Create\
+    \ vpc_id variable from myvpc\n      ansible.builtin.set_fact:\n        vpc_id:\
+    \ \"{{ myvpc.vpc.id }}\"\n      register: vpc_id\n\n    - name: Create a security\
+    \ group called mysg and allow SSH, HTTP and HTTPS traffic\n      amazon.aws.ec2_security_group:\n\
+    \        name: \"mysg\"\n        region: \"us-east-1\"\n        vpc_id: \"{{ vpc_id\
+    \ }}\"\n        rules:\n        - proto: tcp\n          from_port: 80\n      \
+    \    to_port: 80\n          cidr_ip: 0.0.0.0/0\n        - proto: tcp\n       \
+    \   from_port: 443\n          to_port: 443\n          cidr_ip: 0.0.0.0/0\n   \
+    \     - proto: tcp\n          from_port: 22\n          to_port: 22\n         \
+    \ cidr_ip: 0.0.0.0/0\n      register: mysg\n"
+  accepted_answers:
+  - module: amazon.aws.ec2_instance
+    module_called_with:
+    - name: my-instance
+  - module: ec2_instance
+    module_called_with:
+    - name: my-instance

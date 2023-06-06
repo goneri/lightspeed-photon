@@ -1,0 +1,47 @@
+- name: test_remove_image_1
+  prompt: remove image quay.io/tshinhar/wisdom-testing
+  accepted_answers:
+  - module: containers.podman.podman_image
+    module_called_with:
+    - name: quay.io/tshinhar/wisdom-testing
+    - state: absent
+  - module: community.docker.docker_image
+    module_called_with:
+    - name: quay.io/tshinhar/wisdom-testing
+    - state: absent
+- name: test_run_container_with_podman_1
+  prompt: Run container with podman
+  accepted_answers:
+  - module: containers.podman.podman_container
+    module_called_with:
+    - {}
+    - name
+    - image
+- name: test_container_flow_with_podman_1
+  prompt: Stop a podman container named my_app
+  accepted_answers:
+  - module: containers.podman.podman_container
+    module_called_with:
+    - name: my_app
+    - state: stopped
+- name: test_container_flow_with_podman_2
+  prompt: Restart a podman container named my_app
+  accepted_answers:
+  - module: containers.podman.podman_container
+    module_called_with:
+    - name: my_app
+    - state: started
+- name: test_container_flow_with_podman_3
+  prompt: Run a podman container named my_app
+  accepted_answers:
+  - module: containers.podman.podman_container
+    module_called_with:
+    - name: my_app
+    - state: started
+- name: test_export_container_with_podman_1
+  prompt: export a podman container named my_app
+  accepted_answers:
+  - module: containers.podman.podman_export
+    module_called_with:
+    - container: my_app
+    - dest

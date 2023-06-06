@@ -1,0 +1,69 @@
+- name: test_deploy_package_to_cluster_1
+  prompt: deploy prometheus chart inside a new namespace
+  accepted_answers:
+  - module: kubernetes.core.helm
+    module_called_with:
+    - create_namespace: true
+    - name
+    - release_namespace
+    - chart_ref
+  - module: helm
+    module_called_with:
+    - create_namespace: true
+    - name
+    - release_namespace
+    - chart_ref
+- name: test_deploy_package_to_cluster_2
+  prompt: deploy grafana chart inside a new namespace
+  accepted_answers:
+  - module: kubernetes.core.helm
+    module_called_with:
+    - create_namespace: true
+    - name
+    - release_namespace
+    - chart_ref
+  - module: helm
+    module_called_with:
+    - create_namespace: true
+    - name
+    - release_namespace
+    - chart_ref
+- name: test_check_namespace_exists_1
+  prompt: Ensure the myapp Namespace exists
+  accepted_answers:
+  - module: kubernetes.core.k8s
+    module_called_with:
+    - name: myapp
+      kind: Namespace
+  - module: k8s
+    module_called_with:
+    - name: myapp
+      kind: Namespace
+- name: test_create_k8s_deployment_from_file_1
+  prompt: create a k8s deployment by reading the definition from a local file
+  accepted_answers:
+  - module: kubernetes.core.k8s
+    module_called_with:
+    - {}
+    - src
+    - template
+  - module: k8s
+    module_called_with:
+    - {}
+    - src
+    - template
+- name: test_exec_command_on_pod_1
+  prompt: execute a command on a k8s pod
+  accepted_answers:
+  - module: kubernetes.core.k8s_exec
+    module_called_with:
+    - {}
+    - namespace
+    - pod
+    - command
+  - module: k8s_exec
+    module_called_with:
+    - {}
+    - namespace
+    - pod
+    - command

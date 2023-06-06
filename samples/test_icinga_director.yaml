@@ -1,0 +1,83 @@
+- name: test_icinga_director_icinga_service_info_1
+  prompt: Query a service named foo in icinga
+  context: "\n- name: create service named foo using icinga\n  t_systems_mms.icinga_director.icinga_service:\n\
+    \    state: present\n    url: \"{{ url }}\"\n    url_username: \"{{ url_username\
+    \ }}\"\n    url_password: \"{{ url_password }}\"\n    object_name: \"foo\"\n \
+    \   display_name: \"foo\"\n    check_command: hostalive\n    host: foo-host\n"
+  accepted_answers:
+  - module: t_systems_mms.icinga_director.icinga_service_info
+    module_called_with:
+    - {}
+    - url
+    task_uses_loop: false
+  - module: icinga_service_info
+    module_called_with:
+    - {}
+    - url
+    task_uses_loop: false
+- name: test_icinga_director_icinga_command_1
+  prompt: Create icinga command
+  accepted_answers:
+  - module: t_systems_mms.icinga_director.icinga_command
+    module_called_with:
+    - {}
+    - url
+    - object_name
+    task_uses_loop: false
+  - module: icinga_command
+    module_called_with:
+    - {}
+    - url
+    - object_name
+    task_uses_loop: false
+- name: test_icinga_director_icinga_command_info_1
+  prompt: Query a command in icinga
+  context: "\n- name: Create command\n  t_systems_mms.icinga_director.icinga_command:\n\
+    \    state: present\n    url: \"{{ icinga_url }}\"\n    url_username: \"{{ icinga_user\
+    \ }}\"\n    url_password: \"{{ icinga_pass }}\"\n    command: \"/opt/centreon-plugins/centreon_plugins.pl\"\
+    \n    command_type: \"PluginCheck\"\n    disabled: false\n    object_name: foo_command\n"
+  accepted_answers:
+  - module: t_systems_mms.icinga_director.icinga_command_info
+    module_called_with:
+    - {}
+    - url
+    task_uses_loop: false
+  - module: icinga_command_info
+    module_called_with:
+    - {}
+    - url
+    task_uses_loop: false
+- name: test_icinga_director_icinga_host_info_1
+  prompt: Query a host in icinga
+  context: "\n- name: Create a host in icinga named foo\n  t_systems_mms.icinga_director.icinga_host:\n\
+    \    state: present\n    url: \"{{ icinga_url }}\"\n    url_username: \"{{ icinga_user\
+    \ }}\"\n    url_password: \"{{ icinga_pass }}\"\n    check_command: hostalive\n\
+    \    command_endpoint: foo-endpoint\n    display_name: \"foo\"\n    object_name:\
+    \ \"foo\"\n"
+  accepted_answers:
+  - module: t_systems_mms.icinga_director.icinga_host_info
+    module_called_with:
+    - {}
+    - url
+    task_uses_loop: false
+  - module: icinga_host_info
+    module_called_with:
+    - {}
+    - url
+    task_uses_loop: false
+- name: test_icinga_director_icinga_user_info_1
+  prompt: Query a user in icinga
+  context: "\n- name: a user named foo in icinga\n  t_systems_mms.icinga_director.icinga_user:\n\
+    \    state: present\n    url: \"{{ icinga_url }}\"\n    url_username: \"{{ icinga_user\
+    \ }}\"\n    url_password: \"{{ icinga_pass }}\"\n    object_name: \"foo\"\n"
+  accepted_answers:
+  - module: t_systems_mms.icinga_director.icinga_user_info
+    module_called_with:
+    - {}
+    - url
+    task_uses_loop: false
+  - module: icinga_user_info
+    module_called_with:
+    - {}
+    - url
+    task_uses_loop: false

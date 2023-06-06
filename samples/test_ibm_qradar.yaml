@@ -1,0 +1,6 @@
+- name: test_deploy_qradar_1
+  prompt: run an incremental deploy for IBM QRadar
+  accepted_answers:
+  - module: ibm.qradar.deploy
+    module_called_with:
+    - type: INCREMENTAL

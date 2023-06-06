@@ -1,0 +1,76 @@
+- name: test_install_win_features_1
+  prompt: Install NET-Framework-Core windows feature
+  accepted_answers:
+  - module: ansible.windows.win_feature
+    module_called_with:
+    - name: NET-Framework-Core
+    - name: '{{ name }}'
+    - state: present
+  - module: win_feature
+    module_called_with:
+    - name: NET-Framework-Core
+    - name: '{{ name }}'
+    - state: present
+- name: test_win_copy_1
+  prompt: Copy a file to the Windows machine
+  context: "\n- name: Create a directory on the Windows machine\n  ansible.windows.win_file:\n\
+    \    path: C:\\Temp\n    state: directory\n\n"
+  accepted_answers:
+  - module: ansible.windows.win_copy
+    module_called_with:
+    - {}
+    - src
+    - dest
+  - module: win_copy
+    module_called_with:
+    - {}
+    - src
+    - dest
+- name: test_win_powershell_1
+  prompt: Run a PowerShell script
+  accepted_answers:
+  - module: ansible.windows.win_powershell
+    module_called_with:
+    - {}
+    - script
+  - module: win_powershell
+    module_called_with:
+    - {}
+    - script
+- name: test_win_reboot_1
+  prompt: Reboot a windows machine
+  accepted_answers:
+  - module: ansible.windows.win_reboot
+  - module: win_reboot
+- name: test_win_check_service_1
+  prompt: Ensure WinRM starts when the system has settled
+  accepted_answers:
+  - module: ansible.windows.win_service
+    module_called_with:
+    - name: WinRM
+      start_mode: delayed
+  - module: win_service
+    module_called_with:
+    - name: WinRM
+      start_mode: delayed
+- name: test_win_share_1
+  prompt: Add a windows public share
+  accepted_answers:
+  - module: ansible.windows.win_share
+    module_called_with:
+    - {}
+    - name
+    - path
+    - description
+    - list
+    - full
+    - read
+  - module: win_share
+    module_called_with:
+    - {}
+    - name
+    - path
+    - description
+    - list
+    - full
+    - read

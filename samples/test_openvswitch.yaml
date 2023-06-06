@@ -1,0 +1,42 @@
+- name: test_openvswitch_openvswitch_db_1
+  prompt: dpdk disable-in-band copy
+  context: "\n- name: Install openvswitch\n  ansible.builtin.package:\n    name: openvswitch\n\
+    \    state: installed\n- name: Set dpdk-init\n  openvswitch.openvswitch.openvswitch_db:\n\
+    \    table: open_vswitch\n    record: .\n    col: other_config\n    key: dpdk-init\n\
+    \    value: true\n"
+  accepted_answers:
+  - module: openvswitch.openvswitch.openvswitch_db
+    module_called_with:
+    - {}
+    - table
+    - record
+    - col
+    - value
+    - state: present
+    task_uses_loop: false
+  - module: openvswitch_db
+    module_called_with:
+    - {}
+    - table
+    - record
+    - col
+    - value
+    - state: present
+    task_uses_loop: false
+- name: test_openvswitch_openvswitch_port_1
+  prompt: mark port with tag 10 on bridge foo
+  context: "\n- name: Install openvswitch\n  ansible.builtin.package:\n    name: openvswitch\n\
+    \    state: installed\n- name: Create a bridge named foo\n  openvswitch.openvswitch.openvswitch_bridge:\n\
+    \    bridge: foo\n    state: present\n- name: Create a bond on bridge foo\n  openvswitch.openvswitch.openvswitch_bond:\n\
+    \    bridge: foo\n    project: foo\n    state: present\n"
+  accepted_answers:
+  - module: openvswitch.openvswitch.openvswitch_port
+    module_called_with:
+    - tag: 10
+    - state: present
+    task_uses_loop: false
+  - module: openvswitch_port
+    module_called_with:
+    - tag: 10
+    - state: present
+    task_uses_loop: false

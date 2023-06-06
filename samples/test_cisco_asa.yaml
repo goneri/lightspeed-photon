@@ -1,0 +1,51 @@
+- name: test_cisco_asa_facts_1
+  prompt: gather all ASA legacy facts
+  accepted_answers:
+  - module: cisco.asa.asa_facts
+    task_uses_loop: false
+  - module: asa_facts
+    task_uses_loop: false
+- name: test_cisco_asa_acls_1
+  prompt: rename ACL with different name using merged state
+  accepted_answers:
+  - module: cisco.asa.asa_acls
+    module_called_with:
+    - state: merged
+    task_uses_loop: false
+  - module: asa_acls
+    module_called_with:
+    - state: merged
+    task_uses_loop: false
+- name: test_cisco_asa_ogs_1
+  prompt: replace module attributes of given ASA object-group
+  accepted_answers:
+  - module: cisco.asa.asa_ogs
+    module_called_with:
+    - state: replaced
+    task_uses_loop: false
+  - module: asa_ogs
+    module_called_with:
+    - state: replaced
+    task_uses_loop: false
+- name: test_cisco_asa_ogs_2
+  prompt: delete module attributes of given ASA object-group
+  accepted_answers:
+  - module: cisco.asa.asa_ogs
+    module_called_with:
+    - state: deleted
+    task_uses_loop: false
+  - module: asa_ogs
+    module_called_with:
+    - state: deleted
+    task_uses_loop: false
+- name: test_cisco_asa_ogs_3
+  prompt: merge module attributes of given ASA object-group
+  accepted_answers:
+  - module: cisco.asa.asa_ogs
+    module_called_with:
+    - state: merged
+    task_uses_loop: false
+  - module: asa_ogs
+    module_called_with:
+    - state: merged
+    task_uses_loop: false

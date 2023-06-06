@@ -1,0 +1,29 @@
+- name: test_create_azure_vm_1
+  prompt: Create an Azure VM
+  accepted_answers:
+  - module: azure.azcollection.azure_rm_virtualmachine
+  - module: azure_rm_virtualmachine
+- name: test_create_azure_vm_with_context_1
+  prompt: Create an Azure VM
+  context: "\n- name: Create virtual network\n  azure.azcollection.azure_rm_virtualnetwork:\n\
+    \    resource_group: Testing\n    name: testvn001\n    address_prefixes: \"10.10.0.0/16\"\
+    \n\n- name: Add subnet\n  azure.azcollection.azure_rm_subnet:\n    resource_group:\
+    \ Testing\n    name: subnet001\n    address_prefix: \"10.10.0.0/24\"\n    virtual_network:\
+    \ testvn001\n\n"
+  accepted_answers:
+  - module: azure.azcollection.azure_rm_virtualmachine
+  - module: azure_rm_virtualmachine
+- name: test_create_azure_subnet_1
+  prompt: Create an Azure subnet called private_subnet
+  context: "\n- name: Create virtual network\n  azure.azcollection.azure_rm_virtualnetwork:\n\
+    \    resource_group: Testing\n    name: testvn001\n    address_prefixes: \"10.10.0.0/16\"\
+    \n\n- name: Add subnet\n  azure.azcollection.azure_rm_subnet:\n    resource_group:\
+    \ Testing\n    name: subnet001\n    address_prefix: \"10.10.0.0/24\"\n    virtual_network:\
+    \ testvn001\n\n"
+  accepted_answers:
+  - module: azure.azcollection.azure_rm_subnet
+    module_called_with:
+    - name: private_subnet
+  - module: azure_rm_subnet
+    module_called_with:
+    - name: private_subnet

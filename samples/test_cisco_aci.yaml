@@ -1,0 +1,66 @@
+- name: test_cisco_query_specific_region_1
+  prompt: query a region called test_region on cisco cloud
+  accepted_answers:
+  - module: cisco.aci.aci_cloud_region
+    task_uses_loop: false
+    module_called_with:
+    - name: test_region
+  - module: aci_cloud_region
+    task_uses_loop: false
+    module_called_with:
+    - name: test_region
+- name: test_cisco_query_all_zones_1
+  prompt: query all zones on cisco cloud region
+  accepted_answers:
+  - module: cisco.aci.aci_cloud_zone
+    task_uses_loop: false
+    module_called_with:
+    - state: query
+  - module: aci_cloud_zone
+    task_uses_loop: false
+    module_called_with:
+    - state: query
+- name: test_cisco_query_cloud_provider_information_1
+  prompt: query cloud provider information using cisco cloud
+  accepted_answers:
+  - module: cisco.aci.aci_cloud_provider
+    task_uses_loop: false
+    module_called_with:
+    - state: query
+  - module: aci_cloud_provider
+    task_uses_loop: false
+    module_called_with:
+    - state: query
+- name: test_cisco_create_aci_cloud_subnet_1
+  prompt: create aci cloud subnet named foo
+  accepted_answers:
+  - module: cisco.aci.aci_cloud_subnet
+    task_uses_loop: false
+    module_called_with:
+    - name: foo
+  - module: aci_cloud_subnet
+    task_uses_loop: false
+    module_called_with:
+    - name: foo
+- name: test_cisco_query_all_aci_subnets_1
+  prompt: query all aci subnets
+  accepted_answers:
+  - module: cisco.aci.aci_cloud_subnet
+    task_uses_loop: false
+    module_called_with:
+    - state: query
+  - module: aci_cloud_subnet
+    task_uses_loop: false
+    module_called_with:
+    - state: query
+- name: test_cisco_query_all_aci_ntp_policies_1
+  prompt: query all aci NTP policies
+  accepted_answers:
+  - module: cisco.aci.aci_ntp_policy
+    task_uses_loop: false
+    module_called_with:
+    - state: query
+  - module: aci_ntp_policy
+    task_uses_loop: false
+    module_called_with:
+    - state: query

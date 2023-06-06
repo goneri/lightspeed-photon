@@ -1,0 +1,10 @@
+- name: test_create_openstack_vm_1
+  prompt: Create an OpenStack VM
+  accepted_answers:
+  - module: openstack.cloud.server
+- name: test_create_openstack_vm_with_context_1
+  prompt: Create an OpenStack VM
+  context: "\n- openstack.cloud.image:\n    name: Fedora\n    container_format: bare\n\
+    \    disk_format: qcow2\n    state: present\n    filename: Fedora.qcow2\n\n"
+  accepted_answers:
+  - module: openstack.cloud.server

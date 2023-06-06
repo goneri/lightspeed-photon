@@ -1,0 +1,33 @@
+- name: test_win_chocolatey_config_1
+  prompt: config the cache location
+  context: "\n- name: set up using chocolatey package manager\n  hosts: localhost\n\
+    \  connection: local\n"
+  accepted_answers:
+  - module: chocolatey.chocolatey.win_chocolatey_config
+    module_called_with:
+    - state: present
+    task_uses_loop: false
+  - module: win_chocolatey_config
+    module_called_with:
+    - state: present
+    task_uses_loop: false
+- name: test_win_chocolatey_facts_1
+  prompt: gather facts from chocolatey
+  context: "\n- name: set up using chocolatey package manager\n  hosts: localhost\n\
+    \  connection: local\n"
+  accepted_answers:
+  - module: chocolatey.chocolatey.win_chocolatey_facts
+  - module: win_chocolatey_facts
+- name: test_win_chocolatey_feature_1
+  prompt: Disable file checksum matching
+  context: "\n- name: set up features for chocolatey package manager\n  hosts: localhost\n\
+    \  connection: local\n\n  tasks:\n    - name: Stop Chocolatey on the first package\
+    \ failure\n      win_chocolatey_feature:\n      name: stopOnFirstPackageFailure\n\
+    \      state: enabled\n\n"
+  accepted_answers:
+  - module: chocolatey.chocolatey.win_chocolatey_feature
+    module_called_with:
+    - state: disabled
+  - module: win_chocolatey_feature
+    module_called_with:
+    - state: disabled

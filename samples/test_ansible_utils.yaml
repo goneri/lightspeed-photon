@@ -1,0 +1,32 @@
+- name: test_get_diff_1
+  prompt: find the differance between variable1 and variable2
+  context: "\n- name: Set variable1\n  ansible.builtin.set_fact:\n   variable1:\n\
+    \    - \"value1\"\n\n- name: Set variable2\n  ansible.builtin.set_fact:\n   variable1:\n\
+    \    - \"value2\"\n\n"
+  accepted_answers:
+  - module: ansible.utils.fact_diff
+    module_called_with:
+    - {}
+    - before
+    - after
+  - module: fact_diff
+    module_called_with:
+    - {}
+    - before
+    - after
+- name: test_validate_util_1
+  prompt: validate data with jsonschema engine
+  context: "\n- name: set fact named data\n  ansible.builtin.set_fact:\n    data:\
+    \ \"{{ lookup('ansible.builtin.file', './validate/data/show_interfaces_iosxr.json')}}\"\
+    \n\n"
+  accepted_answers:
+  - module: ansible.utils.validate
+    module_called_with:
+    - engine: ansible.utils.jsonschema
+    - data
+    - criteria
+  - module: validate
+    module_called_with:
+    - engine: ansible.utils.jsonschema
+    - data
+    - criteria
