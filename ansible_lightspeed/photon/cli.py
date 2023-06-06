@@ -59,10 +59,8 @@ def check_list_to_kwargs(check_list: CheckListT) -> tuple[list[str], dict[str, A
     for i in check_list:
         if isinstance(i, dict):
             kv.update(i)
-        elif isinstance(i, list):
-            v += i
         else:
-            raise TypeError()
+            v += [i]
     return list(v), kv
 
 
