@@ -61,5 +61,6 @@ class Remote:
                 data = client.infer(grpc_payload, self.grpc_model_name)
             except yaml.YAMLError:
                 raise PredictionFailure from None
+            del data["name"]
             task = Task(data)
         return task
