@@ -1,0 +1,45 @@
+- name: test_query_all_mso_tenants_1
+  prompt: query all mso tenants
+  accepted_answers:
+  - module: cisco.mso.mso_tenant
+    module_called_with:
+    - state: query
+    task_uses_loop: false
+    module_not_called_with:
+    - validate_certs: 'false'
+  - module: mso_tenant
+    module_called_with:
+    - state: query
+    task_uses_loop: false
+    module_not_called_with:
+    - validate_certs: 'false'
+- name: test_query_all_sites_of_mso_tenant_1
+  prompt: query all sites of a mso tenant
+  accepted_answers:
+  - module: cisco.mso.mso_tenant_site
+    module_called_with:
+    - state: query
+    task_uses_loop: false
+    module_not_called_with:
+    - validate_certs: 'false'
+  - module: mso_tenant_site
+    module_called_with:
+    - state: query
+    task_uses_loop: false
+    module_not_called_with:
+    - validate_certs: 'false'
+- name: test_query_all_mso_users_1
+  prompt: query all mso users
+  accepted_answers:
+  - module: cisco.mso.mso_user
+    module_called_with:
+    - state: query
+    task_uses_loop: false
+    module_not_called_with:
+    - validate_certs: 'false'
+  - module: mso_user
+    module_called_with:
+    - state: query
+    task_uses_loop: false
+    module_not_called_with:
+    - validate_certs: 'false'

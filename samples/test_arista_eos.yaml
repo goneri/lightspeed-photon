@@ -1,0 +1,56 @@
+- name: test_arista_eos_config_1
+  prompt: load configuration from file
+  context: "\n- name: configure top level settings using arista\n  arista.eos.eos_config:\n\
+    \    lines: hostname {{ inventory_hostname }}\n    provider:\n      username:\
+    \ \"{{ user }}\"\n      password: \"{{ password }}\"\n      hostname: \"{{ inventory_hostname\
+    \ }}\"\n    save: true\n  become: true\n  register: result\n"
+  accepted_answers:
+  - module: arista.eos.eos_config
+    module_called_with:
+    - {}
+    - src
+    task_uses_loop: false
+  - module: eos_config
+    module_called_with:
+    - {}
+    - src
+    task_uses_loop: false
+- name: test_arista_eos_command_1
+  prompt: run show version on remote devices
+  context: "\n- name: configure top level settings using arista\n  arista.eos.eos_config:\n\
+    \    lines: hostname {{ inventory_hostname }}\n    provider:\n      username:\
+    \ \"{{ user }}\"\n      password: \"{{ password }}\"\n      hostname: \"{{ inventory_hostname\
+    \ }}\"\n    save: true\n  become: true\n  register: result\n"
+  accepted_answers:
+  - module: arista.eos.eos_command
+    task_uses_loop: false
+  - module: eos_command
+    task_uses_loop: false
+- name: test_arista_eos_facts_1
+  prompt: Gather Arista EOS legacy facts
+  accepted_answers:
+  - module: arista.eos.eos_facts
+    module_called_with:
+    - {}
+    - gather_subset
+    task_uses_loop: false
+  - module: eos_facts
+    module_called_with:
+    - {}
+    - gather_subset
+    task_uses_loop: false
+- name: test_arista_eos_system_1
+  prompt: configure hostname and domain-name using arista
+  accepted_answers:
+  - module: arista.eos.eos_system
+    module_called_with:
+    - {}
+    - hostname
+    - domain_name
+    task_uses_loop: false
+  - module: eos_system
+    module_called_with:
+    - {}
+    - hostname
+    - domain_name
+    task_uses_loop: false

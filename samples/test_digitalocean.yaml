@@ -1,0 +1,61 @@
+- name: test_digital_ocean_database_info_1
+  prompt: Gather all databases
+  context: "\n- name: Ensure database is present\n  community.digitalocean.digital_ocean_database::\n\
+    \    name: 'my_db'\n    oauth_token: 'my_token'\n    region: 'my_region'\n   \
+    \ engine: 'my_engine'\n    size: 'my_size'\n    num_nodes: 1\n    state: present\n\
+    \  register: result\n"
+  accepted_answers:
+  - module: community.digitalocean.digital_ocean_database_info
+    module_called_with:
+    - oauth_token: my_token
+    task_uses_loop: false
+  - module: digital_ocean_database_info
+    module_called_with:
+    - oauth_token: my_token
+    task_uses_loop: false
+- name: test_digital_ocean_droplet_info_1
+  prompt: Gather information about Droplet foo
+  context: "\n- name: Create Droplet named foo\n  community.digitalocean.digital_ocean_droplet:\n\
+    \    state: present\n    name: foo\n    size: 2\n    region: tor1\n    image:\
+    \ ubuntu-20-04-x64\n    oauth_token: \"my_token\"\n    wait_timeout: 500\n  register:\
+    \ foo\n"
+  accepted_answers:
+  - module: community.digitalocean.digital_ocean_droplet_info
+    module_called_with:
+    - oauth_token: my_token
+    task_uses_loop: false
+  - module: digital_ocean_droplet_info
+    module_called_with:
+    - oauth_token: my_token
+    task_uses_loop: false
+- name: test_digital_ocean_sshkey_1
+  prompt: Ensure a SSH key is present
+  context: "\n- name: Ensure database is present\n  community.digitalocean.digital_ocean_database::\n\
+    \    name: 'my_db'\n    oauth_token: 'my_token'\n    region: 'my_region'\n   \
+    \ engine: 'my_engine'\n    size: 'my_size'\n    num_nodes: 1\n    state: present\n\
+    \  register: result\n"
+  accepted_answers:
+  - module: community.digitalocean.digital_ocean_sshkey
+    module_called_with:
+    - {}
+    - ssh_pub_key
+    task_uses_loop: false
+  - module: digital_ocean_sshkey
+    module_called_with:
+    - {}
+    - ssh_pub_key
+    task_uses_loop: false
+- name: test_digital_ocean_project_info_1
+  prompt: Get foo project
+  context: "\n- name: create digital-ocean project named foo\n  community.digitalocean.digital_ocean_project:\n\
+    \    name: foo\n    state: present\n    description: \"This is a test project\"\
+    \n    purpose: \"IoT\"\n    environment: \"Development\"\n"
+  accepted_answers:
+  - module: community.digitalocean.digital_ocean_project_info
+    module_called_with:
+    - name: foo
+    task_uses_loop: false
+  - module: digital_ocean_project_info
+    module_called_with:
+    - name: foo
+    task_uses_loop: false

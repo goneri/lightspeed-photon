@@ -1,0 +1,45 @@
+- name: test_f5_bigip_command_1
+  prompt: run command show version on remote devices
+  context: "\n- name: Setup big ip Virtual Server\n  f5networks.f5_modules.bigip_virtual_server:\n\
+    \    name: foo\n    port: 8080\n    provider:\n      server: my.testdomain.net\n\
+    \      user: '{{ username }}'\n      password: '{{ password }}'\n    state: present\n\
+    \  delegate_to: localhost\n"
+  accepted_answers:
+  - module: f5networks.f5_modules.bigip_command
+    module_called_with:
+    - commands: show version
+    task_uses_loop: false
+  - module: bigip_command
+    module_called_with:
+    - commands: show version
+    task_uses_loop: false
+- name: test_f5_bigip_node_1
+  prompt: Modify node description to 'new description'
+  context: "\n- name: Add node\n  f5networks.f5_modules.bigip_node:\n    host: localhost\n\
+    \    name: foo-node\n    provider:\n      server: my.testdomain.net\n      user:\
+    \ '{{ username }}'\n      password: '{{ password }}'\n    state: present\n  delegate_to:\
+    \ localhost\n"
+  accepted_answers:
+  - module: f5networks.f5_modules.bigip_node
+    module_called_with:
+    - description: new description
+    - state: present
+    task_uses_loop: false
+  - module: bigip_node
+    module_called_with:
+    - description: new description
+    - state: present
+    task_uses_loop: false
+- name: test_f5_bigip_device_info_1
+  prompt: Collect BIG-IP information
+  accepted_answers:
+  - module: f5networks.f5_modules.bigip_device_info
+    module_called_with:
+    - {}
+    - gather_subset
+    task_uses_loop: false
+  - module: bigip_device_info
+    module_called_with:
+    - {}
+    - gather_subset
+    task_uses_loop: false

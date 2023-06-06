@@ -1,0 +1,5 @@
+- name: test_continue_to_use_a_fqcn_to_be_consistent_with_the_context_1
+  prompt: create a virtual machine in folder f0 of the datastore dc1
+  accepted_answers:
+  - module: community.vmware.vmware_guest
+  - module: vmware.vmware_rest.vcenter_vm

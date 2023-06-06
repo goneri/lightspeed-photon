@@ -1,0 +1,53 @@
+- name: test_add_entry_authorized_key_with_user_1
+  prompt: authorize the /home/erwan/.ssh/id_rsa.pub ssh key for user erwan
+  accepted_answers: []
+- name: test_mount_a_known_volume_no_unwanted_keys_1
+  prompt: mount the /media/shared volume
+  accepted_answers:
+  - module: mount
+    module_not_called_with:
+    - fstype
+    - opts
+    - src
+  - module: ansible.posix.mount
+    module_not_called_with:
+    - fstype
+    - opts
+    - src
+- name: test_turn_selinux_boolean_true_1
+  prompt: ensure SELinux postgresql_can_rsync boolean is enabled
+  accepted_answers:
+  - module: seboolean
+    module_called_with:
+    - state: 'true'
+    - state: true
+  - module: ansible.posix.seboolean
+    module_called_with:
+    - state: 'true'
+    - state: true
+- name: test_preserve_selinux_boolean_true_across_reboot_1
+  prompt: ensure SELinux postgresql_can_rsync remains true across reboot
+  accepted_answers:
+  - module: seboolean
+    module_called_with:
+    - persistent: 'true'
+    - persistent: true
+    - state: 'true'
+    - state: true
+  - module: ansible.posix.seboolean
+    module_called_with:
+    - persistent: 'true'
+    - persistent: true
+    - state: 'true'
+    - state: true
+- name: test_allow_service_with_firewalld_1
+  prompt: allow Apache2 with firewalld
+  accepted_answers:
+  - module: ansible.posix.firewalld
+    module_called_with:
+    - service: http
+    - service: https
+  - module: firewalld
+    module_called_with:
+    - service: http
+    - service: https

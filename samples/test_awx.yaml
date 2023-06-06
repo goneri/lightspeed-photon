@@ -1,0 +1,42 @@
+- name: test_create_awx_project_1
+  prompt: create a new awx project
+  accepted_answers:
+  - module: awx.awx.project
+    task_uses_loop: false
+  - module: project
+    task_uses_loop: false
+- name: test_create_awx_inventory_1
+  prompt: create a new awx inventory
+  accepted_answers:
+  - module: awx.awx.inventory
+    task_uses_loop: false
+  - module: inventory
+    task_uses_loop: false
+- name: test_add_hosts_to_awx_inventory_1
+  prompt: add hosts to awx inventory
+  context: "\n- name: create a new awx inventory\n  awx.awx.inventory:\n    name:\
+    \ \"{{ item.name }}\"\n    organization: \"{{ item.organization }}\"\n    state:\
+    \ present\n"
+  accepted_answers:
+  - module: awx.awx.host
+    task_uses_loop: false
+  - module: host
+    task_uses_loop: false
+- name: test_create_awx_job_template_1
+  prompt: create a new awx job template
+  accepted_answers:
+  - module: awx.awx.job_template
+    task_uses_loop: false
+  - module: job_template
+    task_uses_loop: false
+- name: test_launch_awx_job_template_1
+  prompt: launch awx job template
+  context: "\n- name: create a new awx job template\n  awx.awx.job_template:\n   \
+    \ name: \"{{ jt_name }}\"\n    project: \"{{ proj_name }}\"\n    playbook: hello_world.yml\n\
+    \    credentials:\n      - \"{{ cred_name }}\"\n      - \"{{ cred_name }}\"\n\
+    \    job_type: run\n    state: present\n    inventory: Demo Inventory\n"
+  accepted_answers:
+  - module: awx.awx.job_launch
+    task_uses_loop: false
+  - module: job_launch
+    task_uses_loop: false

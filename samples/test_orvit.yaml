@@ -1,0 +1,60 @@
+- name: test_create_ovirt_vm_1
+  prompt: Create oVirt virtual machine
+  accepted_answers:
+  - module: ovirt.ovirt.ovirt_vm
+    module_called_with:
+    - {}
+    - auth
+    - cluster
+    - name
+  - module: ovirt_vm
+    module_called_with:
+    - {}
+    - auth
+    - cluster
+    - name
+- name: test_remove_ovirt_vm_1
+  prompt: Remove oVirt virtual machine named my-vm
+  accepted_answers:
+  - module: ovirt.ovirt.ovirt_vm
+    module_called_with:
+    - name: my-vm
+    - auth
+  - module: ovirt_vm
+    module_called_with:
+    - name: my-vm
+    - auth
+- name: test_register_ovirt_vm_1
+  prompt: Register oVirt virtual machine by ID
+  accepted_answers:
+  - module: ovirt.ovirt.ovirt_vm
+    module_called_with:
+    - {}
+    - cluster
+    - id
+    - auth
+  - module: ovirt_vm
+    module_called_with:
+    - {}
+    - cluster
+    - id
+    - auth
+- name: test_create_ovirt_cluster_1
+  prompt: Create oVirt cluster
+  accepted_answers:
+  - module: ovirt.ovirt.ovirt_cluster
+    module_called_with:
+    - {}
+    - name
+    - cpu_type
+    - data_center
+    - compatibility_version
+    - auth
+  - module: ovirt_cluster
+    module_called_with:
+    - {}
+    - name
+    - cpu_type
+    - data_center
+    - compatibility_version
+    - auth

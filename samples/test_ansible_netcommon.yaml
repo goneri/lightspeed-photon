@@ -1,0 +1,43 @@
+- name: test_netcommon_cli_command_1
+  prompt: Run the 'commit replace' command on a cli-based network device
+  context: "\n- name: run show version on remote devices\n  ansible.netcommon.cli_command:\n\
+    \    command: show version\n\n"
+  accepted_answers:
+  - module: ansible.netcommon.cli_command
+    module_called_with:
+    - command: commit replace
+    - prompt
+    - answer
+  - module: cli_command
+    module_called_with:
+    - command: commit replace
+    - prompt
+    - answer
+- name: test_netcommon_grpc_config_1
+  prompt: Get bgp configuration data
+  context: "\n- name: run cli command\n  ansible.netcommon.grpc_get:\n    command:\
+    \ 'show version'\n    display: text\n\n\n"
+  accepted_answers:
+  - module: ansible.netcommon.grpc_get
+    module_called_with:
+    - {}
+    - section
+    - command
+  - module: grpc_get
+    module_called_with:
+    - {}
+    - section
+    - command
+- name: test_netcommon_network_resource_1
+  prompt: Assign interface eth0 to VLAN 10
+  context: "\n- name: Create VLAN 10\n  ansible.netcommon.network_resource:\n    state:\
+    \ present\n    name: vlan10\n    id: 10\n\n"
+  accepted_answers:
+  - module: ansible.netcommon.network_resource
+    module_called_with:
+    - name: eth0
+    - state: present
+  - module: network_resource
+    module_called_with:
+    - name: eth0
+    - state: present
