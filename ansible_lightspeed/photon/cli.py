@@ -8,6 +8,7 @@ from dataclasses import InitVar, dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional, Union
+import textwrap
 
 import yaml
 
@@ -159,7 +160,7 @@ class TestCase:
 
     def evaluate(self, remote: Remote) -> int:
         """Query the API with context/prompt and evaluate all the checks."""
-        logger.debug(f"\nTesting with {remote.name}")
+        logger.debug(f"Testing with {remote.name}")
         logger.debug(f"📹context: {self.context_origin()}")
         logger.debug(f"📝test path {self.test_file}")
         logger.verbose(f"🔮Sending prompt: {self.prompt}")
@@ -170,11 +171,12 @@ class TestCase:
         except PredictionFailure:
             logger.verbose("🔥Invalid answer from the server.")
             return 0
-        logger.verbose("🧙Answer:\n" + yaml.dump(task.struct))
+        logger.verbose(
+            "🧙Answer:\n\n" + textwrap.indent(yaml.dump(task.struct), "    \x1B[3m") + "\x1B[0m"
+        )
         best_score: int = 0
-        for index, check in enumerate(self.accepted_answers, 1):
-            if len(self.accepted_answers):
-                logger.verbose(f"Checking {index} accepted_answer...")
+        for check in self.accepted_answers:
+            logger.debug(f"Checking with {check}")
             result = check.evaluate(task)
             if len(self.accepted_answers):
                 logger.verbose(f"... score {result.score}")
@@ -185,6 +187,7 @@ class TestCase:
 
 def load_test_file(test_file: Path) -> list[TestCase]:
     """Load all the TestCase from a test file."""
+    print(f"Loading {test_file}")
     with test_file.open() as stream:
         content = yaml.safe_load(stream)
 
@@ -239,21 +242,55 @@ def main() -> None:
 
     test_cases = test_loader(args.path)
 
-    score_per_remote = {r.name: 0 for r in remotes}
+    @dataclass
+    class ResultEntry:
+        remote: Remote
+        test_case: TestCase
+        value: int
+
+    results: list[ResultEntry] = []
     for test_case in test_cases:
         if args.test_case_filter and not re.match(args.test_case_filter, test_case.name):
             continue
-        logger.info(f"🎬starting: {test_case.name}")
-        scores = [(remote, test_case.evaluate(remote)) for remote in remotes]
+        logger.info(f"\n🎬starting: {test_case.name}")
+        from typing import TypedDict
 
-        logger.info("test score(s)")
-        for remote, score in scores:
-            if score == 0:
-                logger.info(f"⭕ [{remote.name}]: 0")
-            else:
-                logger.info(f"✅ [{remote.name}]: {score}")
-                score_per_remote[remote.name] += score
+        for remote in remotes:
+            result = ResultEntry(remote, test_case, test_case.evaluate(remote))
+            results.append(result)
+            icon = "✅" if result.value else "⭕"
+            logger.info(f"{icon} [{result.remote.name}]: {result.value}")
+
+    results_per_remote: dict[str, list[ResultEntry]] = {r.name: [] for r in remotes}
+    for score in results:
+        results_per_remote[score.remote.name].append(score)
+
+    from collections import defaultdict
+
+    results_per_file: dict[str, list[ResultEntry]] = {
+        result.test_case.test_file.name: [] for result in results
+    }
+    for result in results:
+        results_per_file[result.test_case.test_file.name].append(result)
+
+    logger.info("\n🏁Score per file(s)")
+    for test_file, results in results_per_file.items():
+        print(f"📄 {test_file}")
+        per_test_case: dict[str, dict[str, list[ResultEntry]]] = defaultdict(dict)
+        for result in results:
+            if result.remote.name not in per_test_case[result.test_case.name]:
+                per_test_case[result.test_case.name][result.remote.name] = []
+            per_test_case[result.test_case.name][result.remote.name].append(result)
+
+        for test_case_name, r_per_remote in per_test_case.items():
+            print(f"   test_case_name={test_case_name}")
+            max_value = max(result.value for results in r_per_remote.values() for result in results)
+            for remote_name, results in sorted(r_per_remote.items()):
+                sum_value = sum(r.value for r in results)
+                ascii_code = "\033[1m" if max_value == sum_value else ""
+                print(f"     {remote_name}: {ascii_code}{sum_value}\033[0m")
 
     logger.info("\n🏁Final score(s)")
-    for remote_name, score in score_per_remote.items():
-        logger.info(f"  - {remote_name}: {score}")
+    for remote_name, results in results_per_remote.items():
+        sum_value = sum(r.value for r in results)
+        logger.info(f"  - {remote_name}: \033[1m{sum_value}\033[0m")
