@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import argparse
 import re
 import sys
@@ -208,20 +209,12 @@ def main() -> None:
     else:
         logger.setLevel("INFO")
 
-    import os
-
     remotes = [
         Remote(
-            name="service-ari-v9",
+            name="prod",
             remote_type="service",
-            end_point="http://localhost:8000",
-            token=os.environ.get("WISDOM_TOKEN", ""),
-        ),
-        Remote(
-            name="model-v9",
-            remote_type="model_grpc",
-            end_point="localhost:8033",
-            grpc_model_name="ansible-wisdom-v09",
+            end_point="https://c.ai.ansible.redhat.com",
+            token=os.environ.get("LIGHTSPEED_TOKEN", ""),
         ),
     ]
 
