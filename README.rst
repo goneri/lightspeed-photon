@@ -64,3 +64,17 @@ Sometimes we want to give some context to improve the quality of the answer. You
     - name: create_an_aws_instance_with_context
       prompt: "    - name: create a new AWS instance called test_vm"
       context: "- set_fact:\n    foo: bar\n"
+
+
+scoring
+=======
+
+Score are computed according to these weights:
+
+- correct module: +40
+- use loop is correct: +10
+- use become is correct: +5
+- an expected key is present: +10
+- an expected key/val is present: +15
+- an unwanted key is present: -10
+- an unwanted key/val is present: -15
